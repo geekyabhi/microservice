@@ -4,7 +4,7 @@ const CustomerService = require("../services/customer-service");
 module.exports = (app) => {
 	const service = new CustomerService();
 
-	app.post("/customer/signup", async (req, res, next) => {
+	app.post("/signup", async (req, res, next) => {
 		try {
 			const { email, password, phone, name } = req.body;
 			const { data } = await service.SignUp({
@@ -19,7 +19,7 @@ module.exports = (app) => {
 		}
 	});
 
-	app.post("/customer/login", async (req, res, next) => {
+	app.post("/login", async (req, res, next) => {
 		try {
 			const { email, password } = req.body;
 
@@ -31,7 +31,7 @@ module.exports = (app) => {
 		}
 	});
 
-	app.post("/customer/address", Auth, async (req, res, next) => {
+	app.post("/address", Auth, async (req, res, next) => {
 		try {
 			const { _id } = req.user;
 
@@ -49,7 +49,7 @@ module.exports = (app) => {
 		}
 	});
 
-	app.get("/customer/profile", Auth, async (req, res, next) => {
+	app.get("/profile", Auth, async (req, res, next) => {
 		try {
 			const { _id } = req.user;
 			const { data } = await service.GetProfile({ _id });
@@ -59,7 +59,7 @@ module.exports = (app) => {
 		}
 	});
 
-	app.put("/customer/profile", Auth, async (req, res, next) => {
+	app.put("/profile", Auth, async (req, res, next) => {
 		try {
 			const { _id } = req.user;
 			const { email, password, phone, name } = req.body;
@@ -77,7 +77,7 @@ module.exports = (app) => {
 		}
 	});
 
-	app.get("/customer/shoping-details", Auth, async (req, res, next) => {
+	app.get("/shoping-details", Auth, async (req, res, next) => {
 		try {
 			const { _id } = req.user;
 			const { data } = await service.GetShopingDetails(_id);
@@ -87,7 +87,7 @@ module.exports = (app) => {
 		}
 	});
 
-	app.get("/customer/wishlist", Auth, async (req, res, next) => {
+	app.get("/wishlist", Auth, async (req, res, next) => {
 		try {
 			const { _id } = req.user;
 			const { data } = await service.GetWishList(_id);

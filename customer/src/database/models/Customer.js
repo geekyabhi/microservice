@@ -10,26 +10,36 @@ const CustomerSchema = new Schema(
 		phone: { type: String, unique: true, required: true },
 		name: { type: String, required: true },
 		address: [
-			{ type: Schema.Types.ObjectId, ref: "address", require: true },
+			{ type: Schema.Types.ObjectId, ref: "address", required: true },
 		],
 		cart: [
 			{
 				product: {
-					type: Schema.Types.ObjectId,
-					ref: "product",
-					require: true,
+					_id: { type: String, required: true },
+					name: { type: String },
+					banner: { type: String },
+					price: { type: Number },
 				},
-				unit: { type: Number, require: true },
+				unit: { type: Number, required: true },
 			},
 		],
 		wishlist: [
 			{
-				type: Schema.Types.ObjectId,
-				ref: "product",
-				require: true,
+				_id: { type: String, required: true },
+				name: { type: String },
+				description: { type: String },
+				banner: { type: String },
+				available: { type: Boolean },
+				price: { type: Number },
 			},
 		],
-		orders: [{ type: Schema.Types.ObjectId, ref: "order", require: true }],
+		orders: [
+			{
+				_id: { type: String, required: true },
+				amount: { type: String },
+				date: { type: Date, default: Date.now() },
+			},
+		],
 	},
 	{
 		toJSON: {

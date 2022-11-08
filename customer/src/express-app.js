@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { customer, products, shopping } = require("./api");
+const { customer } = require("./api");
 const ErrorHandler = require("./utils/error/error-handler");
 const morganMiddleware = require("./middlewares/morgan");
 
