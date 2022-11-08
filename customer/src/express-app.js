@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { customer } = require("./api");
+const { customer, appEvents } = require("./api");
 const ErrorHandler = require("./utils/error/error-handler");
 const morganMiddleware = require("./middlewares/morgan");
 
@@ -11,6 +11,7 @@ module.exports = async (app) => {
 	app.use(cors());
 	app.use(express.static(__dirname + "/public"));
 
+	appEvents(app)
 	customer(app);
 
 	app.use("/status", (req, res, next) => {

@@ -73,6 +73,24 @@ class ProductService {
 			throw new APIError(e);
 		}
 	}
+
+	async GetProductPayload(userId,{productId,qty},event){
+		try{
+			const product=await this.repository.FindById(productId)
+			if(product){
+				const payload={
+					event:event,
+					data:{userId,product,qty}
+				}
+				return FormateData(payload)
+			}else{
+				return FormateData({error:'No payload'})
+			}
+		}catch(e){
+			throw new APIError(e)
+		}
+	}
+
 }
 
 module.exports = ProductService;

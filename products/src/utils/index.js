@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const axios=require('axios')
 
 const { APP_SECRET } = require("../config");
 
@@ -53,6 +54,26 @@ const FormateData = (data) => {
 	}
 };
 
+const PublishCustomerEvent=async(payload)=>{
+	try{
+		const data=axios.post(`http//localhost:8000/customer/app-events`,{
+			payload
+		})
+	}catch(e){
+		console.log(e)
+	}
+}
+
+const PublishShoppingEvent=async(payload)=>{
+	try{
+		const data=axios.post(`http//localhost:8000/shopping/app-events`,{
+			payload
+		})
+	}catch(e){
+		console.log(e)
+	}
+}
+
 module.exports = {
 	GenerateSalt,
 	GeneratePassword,
@@ -60,4 +81,6 @@ module.exports = {
 	GenerateSignature,
 	ValidateSignature,
 	FormateData,
+	PublishCustomerEvent,
+	PublishShoppingEvent
 };

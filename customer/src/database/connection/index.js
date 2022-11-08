@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 require("colors");
 const { DB_URL } = require("../../config");
 
+console.log(DB_URL)
+
 const ConnectDB = () => {
 	return new Promise(async (resolve, reject) => {
 		try {

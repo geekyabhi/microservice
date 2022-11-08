@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { customer, products, shopping } = require("./api");
+const {  products, appEvents } = require("./api");
 const ErrorHandler = require("./utils/error/error-handler");
 const morganMiddleware = require("./middlewares/morgan");
 
@@ -15,10 +15,8 @@ module.exports = async (app) => {
 		res.send("Products service running properly");
 	});
 
-	// customer(app);
-
+	appEvents(app);
 	products(app);
-	// shopping(app);
 
 	app.use(ErrorHandler);
 };

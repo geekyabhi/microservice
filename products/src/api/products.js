@@ -1,10 +1,9 @@
 const ProductService = require("../services/product-service");
-const CustomerService = require("../services/customer-service");
 const Auth = require("../middlewares/auth");
+const { PublishCustomerEvent, PublishShoppingEvent } = require("../utils");
 
 module.exports = (app) => {
 	const service = new ProductService();
-	const customerService = new CustomerService();
 
 	app.post("/product/create", async (req, res, next) => {
 		try {
@@ -69,11 +68,10 @@ module.exports = (app) => {
 
 	app.put("/wishlist", Auth, async (req, res, next) => {
 		const { _id } = req.user;
-
 		try {
-			const product = await service.GetProductById(req.body._id);
-			const wishList = await customerService.AddToWishlist(_id, product);
-			return res.status(200).json({ success: true, data: wishList });
+			const {data:payload}=await service.GetProductPayload(_id,{productId:req.body._id},'ADD_TO_WISHLIST')
+			PublishCustomerEvent(payload)
+			return res.status(200).json({ success: true, data: payload.data.product });
 		} catch (err) {}
 	});
 
