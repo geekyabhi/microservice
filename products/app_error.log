@@ -1,0 +1,14 @@
+[ [36m2022-11-08 11:52:26:5226[39m ]  [35mGET / 200 518 - 42.583 ms[39m
+[35m[39m
+[ [36m2022-11-08 12:01:43:143[39m ]  [35mGET / 304  - 42.638 ms[39m
+[35m[39m
+[ [36m2022-11-08 12:02:45:245[39m ]  [35mGET / 304  - 36.160 ms[39m
+[35m[39m
+[ [36m2022-11-08 12:05:09:59[39m ]  [35mGET / 304  - 37.457 ms[39m
+[35m[39m
+[ [36m2022-11-08 12:05:12:512[39m ]  [31mName : STATUS_CODES is not defined | Descriptiion : Internal Server Error | Status Code : 500 | IsOperational : true[39m
+[ [36m2022-11-08 12:05:12:512[39m ]  [35mGET /status 500 93 - 8.690 ms[39m
+[35m[39m
+[ [36m2022-11-08 12:08:36:836[39m ]  [31mName : STATUS_CODES is not defined | Descriptiion : Internal Server Error | Status Code : 500 | IsOperational : true[39m
+[ [36m2022-11-08 12:08:36:836[39m ]  [35mGET /status 500 93 - 4.275 ms[39m
+[35m[39m
