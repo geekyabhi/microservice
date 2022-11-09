@@ -50,7 +50,7 @@ class ShoppingRepository {
 
         if (cartItems.length > 0) {
           cartItems.map((item) => {
-            if (item.product._id.toString() === _id.toString()) {
+            if (item?.product?._id.toString() === _id.toString()) {
               if (isRemove) {
                 cartItems.splice(cartItems.indexOf(item), 1);
               } else {

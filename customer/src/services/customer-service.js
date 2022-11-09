@@ -239,6 +239,7 @@ class CustomerService {
           break;
       }
     } catch (e) {
+      console.log("HEllo");
       throw new AsyncAPIError(e);
     }
   }

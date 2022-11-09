@@ -70,7 +70,7 @@ const PublishShoppingEvent = async (payload) => {
       payload,
     });
   } catch (e) {
-    console.log(`Error occured on shopping customer event ${e}`);
+    console.log(`Error occured on publishing shopping event ${e}`);
   }
 };
 
