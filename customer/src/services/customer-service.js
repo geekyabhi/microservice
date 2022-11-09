@@ -214,6 +214,7 @@ class CustomerService {
   }
 
   async SubscribeEvents(payload) {
+    payload = JSON.parse(payload);
     try {
       const { event, data } = payload;
 
@@ -239,7 +240,6 @@ class CustomerService {
           break;
       }
     } catch (e) {
-      console.log("HEllo");
       throw new AsyncAPIError(e);
     }
   }

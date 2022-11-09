@@ -1,8 +1,15 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const axios = require("axios");
-
-const { APP_SECRET } = require("../config");
+const amqplib = require("amqplib");
+// const axios = require("axios");
+const { AsyncAPIError } = require("../utils/error/app-errors");
+const {
+  APP_SECRET,
+  EXCHANGE_NAME,
+  MESSAGE_QUEUE_URL,
+  QUEUE_NAME,
+  PRODUCT_BINDING_KEY,
+} = require("../config");
 
 const GenerateSalt = async () => {
   try {
@@ -54,23 +61,60 @@ const FormateData = (data) => {
   }
 };
 
-const PublishCustomerEvent = async (payload) => {
+// const PublishCustomerEvent = async (payload) => {
+//   try {
+//     const data = await axios.post(`http://localhost:8000/customer/app-events`, {
+//       payload,
+//     });
+//   } catch (e) {
+//     console.log(`Error occured on publishing customer event ${e}`);
+//   }
+// };
+
+// const PublishShoppingEvent = async (payload) => {
+//   try {
+//     const data = await axios.post(`http://localhost:8000/shopping/app-events`, {
+//       payload,
+//     });
+//   } catch (e) {
+//     console.log(`Error occured on publishing shopping event ${e}`);
+//   }
+// };
+
+const CreateChannel = async () => {
   try {
-    const data = await axios.post(`http://localhost:8000/customer/app-events`, {
-      payload,
-    });
+    const connection = await amqplib.connect(MESSAGE_QUEUE_URL);
+    const channel = await connection.createChannel();
+    await channel.assertExchange(EXCHANGE_NAME, "direct", false);
+    return channel;
   } catch (e) {
-    console.log(`Error occured on publishing customer event ${e}`);
+    throw new Error(e);
   }
 };
 
-const PublishShoppingEvent = async (payload) => {
+const PublishMessage = async (channel, binding_key, message) => {
   try {
-    const data = await axios.post(`http://localhost:8000/shopping/app-events`, {
-      payload,
+    await channel.publish(EXCHANGE_NAME, binding_key, Buffer.from(message));
+    console.log("Message has been published from product service", message);
+  } catch (e) {
+    throw new AsyncAPIError(e);
+  }
+};
+
+const SubscribeMessage = async (channel, service) => {
+  try {
+    const appQueue = await channel.assertQueue(QUEUE_NAME);
+    channel.bindQueue(appQueue.queue, EXCHANGE_NAME, PRODUCT_BINDING_KEY);
+    channel.consume(appQueue.queue, (data) => {
+      try {
+        console.log("Message subscribed in product service");
+        channel.ack(data);
+      } catch (e) {
+        throw new AsyncAPIError(e);
+      }
     });
   } catch (e) {
-    console.log(`Error occured on publishing shopping event ${e}`);
+    throw new AsyncAPIError(e);
   }
 };
 
@@ -81,6 +125,9 @@ module.exports = {
   GenerateSignature,
   ValidateSignature,
   FormateData,
-  PublishCustomerEvent,
-  PublishShoppingEvent,
+  // PublishCustomerEvent,
+  // PublishShoppingEvent,
+  CreateChannel,
+  PublishMessage,
+  SubscribeMessage,
 };

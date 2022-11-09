@@ -4,7 +4,7 @@ const { products, appEvents } = require("./api");
 const ErrorHandler = require("./utils/error/error-handler");
 const morganMiddleware = require("./middlewares/morgan");
 
-module.exports = async (app) => {
+module.exports = async (app, channel) => {
   app.use(morganMiddleware);
   app.use(express.json({ limit: "1mb" }));
   app.use(express.urlencoded({ extended: true, limit: "1mb" }));
@@ -15,8 +15,8 @@ module.exports = async (app) => {
     res.send("Products service running properly");
   });
 
-  appEvents(app);
-  products(app);
+  // appEvents(app);
+  products(app, channel);
 
   app.use(ErrorHandler);
 };

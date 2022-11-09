@@ -1,7 +1,16 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const { APP_SECRET } = require("../config");
+const amqplib = require("amqplib");
+
+const {
+  APP_SECRET,
+  SHOPPING_BINDING_KEY,
+  MESSAGE_QUEUE_URL,
+  EXCHANGE_NAME,
+  QUEUE_NAME,
+} = require("../config");
+const { AsyncAPIError } = require("./error/app-errors");
 
 const GenerateSalt = async () => {
   try {
@@ -63,6 +72,44 @@ const PublishCustomerEvent = async (payload) => {
   }
 };
 
+const CreateChannel = async () => {
+  try {
+    const connection = await amqplib.connect(MESSAGE_QUEUE_URL);
+    const channel = await connection.createChannel();
+    await channel.assertExchange(EXCHANGE_NAME, "direct", false);
+    return channel;
+  } catch (e) {
+    throw new Error(e);
+  }
+};
+
+const PublishMessage = async (channel, binding_key, message) => {
+  try {
+    await channel.publish(EXCHANGE_NAME, binding_key, Buffer.from(message));
+    console.log("Message has been published from shopping service", message);
+  } catch (e) {
+    throw new AsyncAPIError(e);
+  }
+};
+
+const SubscribeMessage = async (channel, service) => {
+  try {
+    const appQueue = await channel.assertQueue(QUEUE_NAME);
+    channel.bindQueue(appQueue.queue, EXCHANGE_NAME, SHOPPING_BINDING_KEY);
+    channel.consume(appQueue.queue, async (data) => {
+      try {
+        console.log("Message subscribed in shopping service");
+        await service.SubscribeEvents(data.content.toString());
+        channel.ack(data);
+      } catch (e) {
+        throw new AsyncAPIError(e);
+      }
+    });
+  } catch (e) {
+    throw new AsyncAPIError(e);
+  }
+};
+
 module.exports = {
   GenerateSalt,
   GeneratePassword,
@@ -71,4 +118,7 @@ module.exports = {
   ValidateSignature,
   FormateData,
   PublishCustomerEvent,
+  CreateChannel,
+  PublishMessage,
+  SubscribeMessage,
 };
