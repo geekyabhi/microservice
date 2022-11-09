@@ -1,41 +1,49 @@
 const ShoppingService = require("../services/shopping-service");
-const UserService = require("../services/customer-service");
 const Auth = require("../middlewares/auth");
+const { PublishCustomerEvent } = require("../utils");
 
 module.exports = (app) => {
-	const service = new ShoppingService();
-	const userService = new UserService();
+  const service = new ShoppingService();
 
-	app.post("/shopping/order", Auth, async (req, res, next) => {
-		const { _id } = req.user;
-		const { txnNumber } = req.body;
+  app.post("/order", Auth, async (req, res, next) => {
+    const { _id } = req.user;
+    const { txnNumber } = req.body;
 
-		try {
-			const { data } = await service.PlaceOrder({ _id, txnNumber });
-			return res.status(200).json(data);
-		} catch (err) {
-			next(err);
-		}
-	});
+    try {
+      const { data } = await service.PlaceOrder({ _id, txnNumber });
 
-	app.get("/shopping/orders", Auth, async (req, res, next) => {
-		const { _id } = req.user;
+      const payload = await service.GetProductPayload(
+        _id,
+        data,
+        "CREATE_ORDER"
+      );
 
-		try {
-			const { data } = await userService.GetShopingDetails(_id);
-			return res.status(200).json(data.orders);
-		} catch (err) {
-			next(err);
-		}
-	});
+      PublishCustomerEvent(payload);
 
-	app.get("/shopping/cart", Auth, async (req, res, next) => {
-		const { _id } = req.user;
-		try {
-			const { data } = await userService.GetShopingDetails(_id);
-			return res.status(200).json(data.cart);
-		} catch (err) {
-			next(err);
-		}
-	});
+      return res.status(200).json(data);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  app.get("/orders", Auth, async (req, res, next) => {
+    const { _id } = req.user;
+
+    try {
+      const { data } = await service.GetOrders(_id);
+      return res.status(200).json(data);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  app.get("/cart", Auth, async (req, res, next) => {
+    const { _id } = req.user;
+    try {
+      const { data } = await service.getCart({ _id });
+      return res.status(200).json(data);
+    } catch (err) {
+      next(err);
+    }
+  });
 };
