@@ -94,17 +94,22 @@ const PublishMessage = async (channel, binding_key, message) => {
 
 const SubscribeMessage = async (channel, service) => {
   try {
-    const appQueue = await channel.assertQueue(QUEUE_NAME);
+    // await channel.assertExchange(EXCHANGE_NAME, "direct", { durable: true });
+    const appQueue = await channel.assertQueue("", { exclusive: true });
     channel.bindQueue(appQueue.queue, EXCHANGE_NAME, SHOPPING_BINDING_KEY);
-    channel.consume(appQueue.queue, async (data) => {
-      try {
-        console.log("Message subscribed in shopping service");
-        await service.SubscribeEvents(data.content.toString());
-        channel.ack(data);
-      } catch (e) {
-        throw new AsyncAPIError(e);
-      }
-    });
+    channel.consume(
+      appQueue.queue,
+      async (data) => {
+        try {
+          console.log("Message subscribed in shopping service");
+          await service.SubscribeEvents(data.content.toString());
+          channel.ack(data);
+        } catch (e) {
+          throw new AsyncAPIError(e);
+        }
+      },
+      { noAck: true }
+    );
   } catch (e) {
     throw new AsyncAPIError(e);
   }

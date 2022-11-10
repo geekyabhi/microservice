@@ -115,7 +115,7 @@ module.exports = (app, channel) => {
 
       //   PublishCustomerEvent(payload);
       //   PublishShoppingEvent(payload);
-      // PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(payload));
+      PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(payload));
       PublishMessage(channel, SHOPPING_BINDING_KEY, JSON.stringify(payload));
 
       return res.status(200).json({
