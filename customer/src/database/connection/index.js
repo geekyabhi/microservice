@@ -5,7 +5,7 @@ const { DB_URL } = require("../../config");
 const ConnectDB = () => {
   return new Promise(async (resolve, reject) => {
     try {
-      const { connection } = await mongoose.connect(DB_URL, {
+      const { connection } = await mongoose.connect(encodeURI(DB_URL), {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });

@@ -7,7 +7,7 @@ const { CreateChannel } = require("./utils");
 const StartServer = async () => {
   try {
     const app = express();
-    await ConnectDB();
+    // await ConnectDB();
 
     const channel = await CreateChannel();
     await expressApp(app, channel);

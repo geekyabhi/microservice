@@ -1,78 +1,38 @@
 version: "3.8"
 
 services:
-  nosql-db:
-    image: mongo
-    ports:
-      - "27017:27017"
-    container_name: nosql-db
-    volumes:
-      - ./db/:/data/db
+    nginx:
+        image: nginx:latest
+        restart: always
+        container_name: nginx
+        volumes:
+            - "./nginx/default.conf:/etc/nginx/conf.d/default.conf"
+        ports:
+            - "8000:80"
 
-  products:
-    build:
-      dockerfile: Dockerfile
-      context: ./products
-    container_name: products
-    ports:
-      - "8002:8002"
-    restart: "always"
-    depends_on:
-      # - "nosql-db"
-      - nginx
-    volumes:
-      - .:/app
-      - /app/products/node_modules
+    customer:
+        build:
+            context: ./customer
+            dockerfile: Dockerfile
+        ports:
+            - "8001:8001"
+        container_name: customer
+        restart: always
 
-  shopping:
-    build:
-      dockerfile: Dockerfile
-      context: ./shopping
-    container_name: shopping
-    ports:
-      - "8003:8003"
-    restart: "always"
-    depends_on:
-      # - "nosql-db"
-      - nginx
-    volumes:
-      - .:/app
-      - /app/shopping/node_modules
+    products:
+        build:
+            context: ./products
+            dockerfile: Dockerfile
+        ports:
+            - "8002:8002"
+        container_name: products
+        restart: always
 
-  customer:
-    build:
-      dockerfile: Dockerfile
-      context: ./customer
-    container_name: customer
-    ports:
-      - "8001:8001"
-    restart: "always"
-    depends_on:
-      # - "nosql-db"
-      - nginx
-    volumes:
-      - .:/app
-      - /app/customer/node_modules
-
-  nginx:
-    restart: always
-    image: nginx:latest
-    container_name: nginx
-    volumes:
-      - "./nginx/default.conf:/etc/nginx/conf.d/default.conf"
-    ports:
-      - "8080:80"
-
-  # nginx-proxy:
-  #   build:
-  #     dockerfile: Dockerfile
-  #     context: ./proxy
-  #   container_name: nginx
-  #   ports:
-  #     - "5000:80"
-  #   restart: "always"
-
-  #   depends_on:
-  #     - "products"
-  #     - "customer"
-  #     - "shopping"
+    shopping:
+        build:
+            context: ./shopping
+            dockerfile: Dockerfile
+        ports:
+            - "8003:8003"
+        container_name: shopping
+        restart: always
