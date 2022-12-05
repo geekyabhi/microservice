@@ -1,4 +1,8 @@
-const { BadRequestError, APIError } = require("../../utils/error/app-errors");
+const {
+	BadRequestError,
+	APIError,
+	STATUS_CODES,
+} = require("../../utils/error/app-errors");
 const { ProductModel } = require("../models");
 
 class ProductRepository {

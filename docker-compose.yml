@@ -10,6 +10,14 @@ services:
         ports:
             - "8000:80"
 
+    nosql-db:
+        image: mongo
+        ports:
+            - "27017:27017"
+        container_name: nosql-db
+        volumes:
+            - ./db/:/data/db
+
     customer:
         build:
             context: ./customer
