@@ -1,12 +1,12 @@
 const ShoppingService = require("../services/shopping-service");
 
 module.exports = (app) => {
-  const service = new ShoppingService();
+	const service = new ShoppingService();
 
-  app.use("/app-events", async (req, res, next) => {
-    const { payload } = req.body;
-    service.SubscribeEvents(payload);
-    console.log("Shopping Service received event");
-    return res.status(200).json(payload);
-  });
+	app.use("/app-events", async (req, res, next) => {
+		const { payload } = req.body;
+		service.SubscribeEvents(JSON.stringify(payload));
+		console.log("Shopping Service received event");
+		return res.status(200).json(payload);
+	});
 };

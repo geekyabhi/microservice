@@ -64,9 +64,7 @@ class ShoppingService {
 		payload = JSON.parse(payload);
 		try {
 			const { event, data } = payload;
-
 			const { userId, product, order, qty } = data;
-
 			switch (event) {
 				case "ADD_TO_CART":
 					await this.ManageCart(userId, product, qty, false);
