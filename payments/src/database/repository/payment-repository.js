@@ -1,0 +1,3 @@
+class PaymentRepository {
+	async CreatePayment() {}
+}

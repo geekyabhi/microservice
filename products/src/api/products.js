@@ -64,12 +64,12 @@ module.exports = (app, channel) => {
 		}
 	});
 
-	app.put("/wishlist", Auth, async (req, res, next) => {
+	app.put("/wishlist/:id", Auth, async (req, res, next) => {
 		const { _id } = req.user;
 		try {
 			const { data: payload } = await service.GetProductPayload(
 				_id,
-				{ productId: req.body._id },
+				{ productId: req.params._id },
 				"ADD_TO_WISHLIST"
 			);
 			PublishMessage(
@@ -110,13 +110,13 @@ module.exports = (app, channel) => {
 		}
 	});
 
-	app.put("/cart", Auth, async (req, res, next) => {
+	app.put("/cart/:id", Auth, async (req, res, next) => {
 		const { _id } = req.user;
 
 		try {
 			const { data: payload } = await service.GetProductPayload(
 				_id,
-				{ productId: req.body._id, qty: req.body.qty },
+				{ productId: req.params._id, qty: req.body.qty },
 				"ADD_TO_CART"
 			);
 
