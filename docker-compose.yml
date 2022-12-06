@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+    nginx:
+        image: nginx:latest
+        restart: always
+        container_name: nginx
+        volumes:
+            - "./nginx/default.conf:/etc/nginx/conf.d/default.conf"
+        ports:
+            - "8000:80"
+
+    nosql-db:
+        image: mongo
+        ports:
+            - "27017:27017"
+        container_name: nosql-db
+        volumes:
+            - ./db/:/data/db
+
+    customer:
+        build:
+            context: ./customer
+            dockerfile: Dockerfile
+        ports:
+            - "8001:8001"
+        container_name: customer
+        restart: always
+
+    products:
+        build:
+            context: ./products
+            dockerfile: Dockerfile
+        ports:
+            - "8002:8002"
+        container_name: products
+        restart: always
+
+    shopping:
+        build:
+            context: ./shopping
+            dockerfile: Dockerfile
+        ports:
+            - "8003:8003"
+        container_name: shopping
+        restart: always
