@@ -1,8 +1,4 @@
-const {
-	BadRequestError,
-	APIError,
-	STATUS_CODES,
-} = require("../../utils/error/app-errors");
+const { APIError, STATUS_CODES } = require("../../utils/error/app-errors");
 const { ProductModel } = require("../models");
 
 class ProductRepository {
@@ -39,9 +35,9 @@ class ProductRepository {
 		}
 	}
 
-	async Products() {
+	async Products(query) {
 		try {
-			return await ProductModel.find();
+			return await ProductModel.find(query);
 		} catch (e) {
 			throw new APIError(
 				"API Error",
@@ -59,19 +55,6 @@ class ProductRepository {
 				"API Error",
 				STATUS_CODES.INTERNAL_ERROR,
 				`Unable to Find Product ${e}`
-			);
-		}
-	}
-
-	async FindByCategory(category) {
-		try {
-			const products = await ProductModel.find({ type: category });
-			return products;
-		} catch (e) {
-			throw new APIError(
-				"API Error",
-				STATUS_CODES.INTERNAL_ERROR,
-				`Unable to Find Category ${e}`
 			);
 		}
 	}

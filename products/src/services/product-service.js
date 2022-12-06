@@ -18,9 +18,9 @@ class ProductService {
 		}
 	}
 
-	async GetProducts() {
+	async GetProducts(query) {
 		try {
-			const products = await this.repository.Products();
+			const products = await this.repository.Products(query);
 
 			let categories = {};
 
@@ -41,15 +41,6 @@ class ProductService {
 		try {
 			const product = await this.repository.FindById(productId);
 			return FormateData(product);
-		} catch (e) {
-			throw new APIError(e);
-		}
-	}
-
-	async GetProductsByCategory(category) {
-		try {
-			const products = await this.repository.FindByCategory(category);
-			return FormateData(products);
 		} catch (e) {
 			throw new APIError(e);
 		}
