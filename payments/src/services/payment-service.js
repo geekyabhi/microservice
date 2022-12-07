@@ -9,8 +9,24 @@ class PaymentService {
 		this.repository = new PaymentRepository();
 	}
 
-	async PurchaseStart({ customerId, items, amount }) {
+	async PurchaseStart({ customerId, items }) {
 		try {
+			let amount = 0;
+
+			if (items) {
+				items = items.filter(
+					(item) => item?.products?.price && item?.unit
+				);
+
+				items.forEach((item) => {
+					amount +=
+						(item?.products?.price ? item?.products?.price : 0) *
+						(item.unit ? item.unit : 0);
+				});
+			}
+
+			if (!amount) throw new Error("No item selected");
+
 			const order = await CreateOrder({
 				amount: amount * 100,
 				currency: "INR",

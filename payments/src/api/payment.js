@@ -13,12 +13,11 @@ module.exports = (app, channel) => {
 	app.post("/start", Auth, async (req, res, next) => {
 		try {
 			const customerId = req.user._id;
-			const { amount, items } = req.body;
+			const { items } = req.body;
 
 			const data = await paymentService.PurchaseStart({
 				customerId,
 				items,
-				amount,
 			});
 
 			return res.json({ success: true, data });
