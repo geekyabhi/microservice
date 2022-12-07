@@ -107,6 +107,7 @@ const SubscribeMessage = async (channel, service) => {
 			async (data) => {
 				try {
 					console.log("Message subscribed in shopping service");
+					// console.log(JSON.parse(data.content.toString()));
 					await service.SubscribeEvents(data.content.toString());
 					// channel.ack(data);
 				} catch (e) {

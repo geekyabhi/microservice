@@ -116,9 +116,27 @@ module.exports = (app, channel) => {
 		try {
 			const { data: payload } = await service.GetProductPayload(
 				_id,
-				{ productId: req.params._id, qty: req.body.qty },
+				{ productId: req.params.id, qty: req.body.qty },
 				"ADD_TO_CART"
 			);
+
+			const cartPayload = {
+				event: payload.event,
+				customerId: _id,
+				data: {
+					item: {
+						_id: payload?.data?.product?._id,
+						name: payload?.data?.product?.name,
+						desc: payload?.data?.product?.desc,
+						type: payload?.data?.product?.type,
+						price: payload?.data?.product?.price,
+						banner: payload?.data?.product?.banner,
+						suplier: payload?.data?.product?.suplier,
+						unit: payload?.data?.product?.unit,
+					},
+					unit: payload?.data?.product?.unit,
+				},
+			};
 
 			PublishMessage(
 				channel,
@@ -128,14 +146,14 @@ module.exports = (app, channel) => {
 			PublishMessage(
 				channel,
 				SHOPPING_BINDING_KEY,
-				JSON.stringify(payload)
+				JSON.stringify(cartPayload)
 			);
 
 			return res.status(200).json({
 				success: true,
 				data: {
-					product: payload.data.product,
-					unit: payload.data.qty,
+					product: payload?.data?.product,
+					unit: payload?.data?.qty,
 				},
 			});
 		} catch (err) {

@@ -1,4 +1,4 @@
-const { FormateData } = require("../../../customer/src/utils");
+const { FormateData } = require("../utils/index");
 const PaymentRepository = require("../database/repository/payment-repository");
 const { APIError } = require("../utils/error/app-errors");
 
@@ -42,19 +42,6 @@ class PaymentService {
 					razorpay_payment_id,
 					razorpay_signature,
 				});
-			// const plan = await this.planService.FindPlanById({ planId });
-			// await this.planRepository.AddCustomerToPlan({
-			// 	planId,
-			// 	customerId,
-			// });
-			// const updatedCustomer = await this.customerRepository.AddPlantoCustomer(
-			// 	{
-			// 		planId,
-			// 		started: currDate,
-			// 		activeTill: new Date(moment(currDate).add(plan.period, "M")),
-			// 		customerId,
-			// 	}
-			// );
 			return FormateData(updatedPurchase);
 		} catch (e) {
 			throw new APIError(e);
@@ -62,6 +49,25 @@ class PaymentService {
 	}
 
 	async PurchaseVerfiy() {}
+
+	async GetPaymentPayload(customerId, { razorpay_order_id }, event) {
+		try {
+			const payment = await this.repository.FindOnePayemnt({
+				razorpay_order_id,
+			});
+
+			if (!payment)
+				return FormateData({ error: "No product is available" });
+			const payload = {
+				event: event,
+				customerId,
+				payment,
+			};
+			return FormateData(payload);
+		} catch (e) {
+			throw new APIError(e);
+		}
+	}
 }
 
 module.exports = PaymentService;

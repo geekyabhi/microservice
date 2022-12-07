@@ -6,55 +6,60 @@ const {
 	STATUS_CODES,
 } = require("../utils/error/app-errors");
 
-// All Business logic will be here
 class ShoppingService {
 	constructor() {
 		this.repository = new ShoppingRepository();
 	}
-
-	async getCart({ _id }) {
+	async CreateOrder({ orderId, customerId, amount, status, txnId, items }) {
 		try {
-			const cartItems = await this.repository.Cart(_id);
-			return FormateData(cartItems);
+			const order = await this.repository.CreateOrder({
+				orderId,
+				customerId,
+				amount,
+				status,
+				txnId,
+				items,
+			});
+			return FormateData(order);
 		} catch (e) {
 			throw new APIError(e);
 		}
 	}
 
-	async PlaceOrder(userInput) {
-		const { _id, txnNumber } = userInput;
-
-		// Verify the txn number with payment logs
-
+	async AddItemToCart({ customerId, item, unit }) {
 		try {
-			const orderResult = await this.repository.CreateNewOrder(
-				_id,
-				txnNumber
-			);
-			return FormateData(orderResult);
+			const cart = await this.repository.AddToCart({
+				customerId,
+				item,
+				unit,
+			});
+			return FormateData(cart);
 		} catch (e) {
 			throw new APIError(e);
 		}
 	}
 
-	async GetOrders(customerId) {
+	async FindOrders({ customerId }) {
 		try {
-			const orders = await this.repository.Orders(customerId);
+			const orders = await this.repository.GetOrders({ customerId });
 			return FormateData(orders);
 		} catch (e) {
 			throw new APIError(e);
 		}
 	}
 
-	async ManageCart(customerId, item, qty, isRemove) {
+	async FindCart({ customerId }) {
 		try {
-			const cartResult = await this.repository.AddCartItem(
-				customerId,
-				item,
-				qty,
-				isRemove
-			);
-			return FormateData(cartResult);
+			const carts = await this.repository.GetCart({ customerId });
+			return FormateData(carts);
+		} catch (e) {
+			throw new APIError(e);
+		}
+	}
+
+	async ClearCart({ customerId }) {
+		try {
+			await this.repository.EmptyCart({ customerId });
 		} catch (e) {
 			throw new APIError(e);
 		}
@@ -63,36 +68,39 @@ class ShoppingService {
 	async SubscribeEvents(payload) {
 		payload = JSON.parse(payload);
 		try {
-			const { event, data } = payload;
-			const { userId, product, order, qty } = data;
+			const { event, data, customerId } = payload;
+			let {
+				razorpay_order_id,
+				razorpay_payment_id,
+				amount,
+				completed,
+				items,
+				item,
+				unit,
+			} = data;
+
 			switch (event) {
-				case "ADD_TO_CART":
-					await this.ManageCart(userId, product, qty, false);
+				case "CLEAR_CART":
+					await this.ClearCart({ customerId });
 					break;
-				case "REMOVE_FROM_CART":
-					await this.ManageCart(userId, product, qty, true);
+				case "ADD_TO_ORDERS":
+					await this.CreateOrder({
+						orderId: razorpay_order_id,
+						customerId,
+						amount,
+						status: completed ? "Completed" : null,
+						txnId: razorpay_payment_id,
+						items,
+					});
+					break;
+				case "ADD_TO_CART":
+					await this.AddItemToCart({ customerId, item, unit });
 					break;
 				default:
 					break;
 			}
 		} catch (e) {
 			throw new AsyncAPIError(e);
-		}
-	}
-
-	async GetProductPayload(userId, order, event) {
-		try {
-			if (order) {
-				const payload = {
-					event: event,
-					data: { userId, product, qty },
-				};
-				return FormateData(payload);
-			} else {
-				return FormateData({ error: "No order is available" });
-			}
-		} catch (e) {
-			throw new APIError(e);
 		}
 	}
 }

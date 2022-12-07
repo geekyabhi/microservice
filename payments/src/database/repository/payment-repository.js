@@ -1,4 +1,4 @@
-const { APIError } = require("../../utils/error/app-errors");
+const { APIError, STATUS_CODES } = require("../../utils/error/app-errors");
 const { PaymentModel } = require("../models");
 
 class PaymentRepository {
@@ -85,6 +85,8 @@ class PaymentRepository {
 		try {
 			const payment = await PaymentModel.findOne({ razorpay_order_id });
 
+			if (!payment) throw new Error("No such payment");
+
 			payment.customerId = customerId || payment.customerId;
 			payment.completed = completed || payment.completed;
 			payment.verified = verified || payment.verified;
@@ -102,6 +104,32 @@ class PaymentRepository {
 				"API Error",
 				STATUS_CODES.INTERNAL_ERROR,
 				`Error on updating payment ${e}`
+			);
+		}
+	}
+
+	async FindPayment(query) {
+		try {
+			const payments = await PaymentModel.find(query);
+			return payments;
+		} catch (e) {
+			throw new APIError(
+				"API Error",
+				STATUS_CODES.INTERNAL_ERROR,
+				`Error on finding payment ${e}`
+			);
+		}
+	}
+
+	async FindOnePayemnt(query) {
+		try {
+			const payment = await PaymentModel.findOne(query);
+			return payment;
+		} catch (e) {
+			throw new APIError(
+				"API Error",
+				STATUS_CODES.INTERNAL_ERROR,
+				`Error on finding payment ${e}`
 			);
 		}
 	}
