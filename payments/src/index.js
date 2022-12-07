@@ -13,7 +13,7 @@ const StartServer = async () => {
 		await expressApp(app, channel);
 
 		app.listen(PORT, () => {
-			console.log(`Products server running to port ${PORT}`.yellow);
+			console.log(`Payment server running to port ${PORT}`.yellow);
 			console.log(`http://localhost:${PORT}`.yellow.underline);
 		}).on("error", (err) => {
 			throw new Error(err);

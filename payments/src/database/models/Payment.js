@@ -38,6 +38,10 @@ const PaymentSchema = new Schema(
 		razorpay_signature: {
 			type: String,
 		},
+		amount: {
+			type: Number,
+			default: 0,
+		},
 	},
 	{
 		toJSON: {

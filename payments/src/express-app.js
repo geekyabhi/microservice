@@ -1,8 +1,8 @@
 const express = require("express");
 const cors = require("cors");
-const { products } = require("./api");
 const ErrorHandler = require("./utils/error/error-handler");
 const morganMiddleware = require("./middlewares/morgan");
+const { payment } = require("./api");
 
 module.exports = async (app, channel) => {
 	app.use(morganMiddleware);
@@ -12,10 +12,10 @@ module.exports = async (app, channel) => {
 	app.use(express.static(__dirname + "/public"));
 
 	app.use("/status", (req, res, next) => {
-		res.send("Products service running properly");
+		res.send("Payments service running properly");
 	});
 
-	products(app, channel);
+	payment(app, channel);
 
 	app.use(ErrorHandler);
 };
