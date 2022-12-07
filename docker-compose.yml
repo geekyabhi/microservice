@@ -44,3 +44,12 @@ services:
             - "8003:8003"
         container_name: shopping
         restart: always
+
+    payments:
+        build:
+            context: ./payments
+            dockerfile: Dockerfile
+        ports:
+            - "8004:8004"
+        container_name: payments
+        restart: always

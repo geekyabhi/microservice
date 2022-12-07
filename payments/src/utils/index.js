@@ -1,14 +1,13 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
 const amqplib = require("amqplib");
-
 const {
 	APP_SECRET,
-	SHOPPING_BINDING_KEY,
-	MESSAGE_QUEUE_URL,
 	EXCHANGE_NAME,
+	MESSAGE_QUEUE_URL,
 	QUEUE_NAME,
+	CUSTOMER_BINDING_KEY,
+	PAYMENT_BINDING_KEY,
 } = require("../config");
 const { AsyncAPIError } = require("./error/app-errors");
 
@@ -62,19 +61,6 @@ const FormateData = (data) => {
 	}
 };
 
-const PublishCustomerEvent = async (payload) => {
-	try {
-		const data = await axios.post(
-			`http://localhost:8000/customer/app-events`,
-			{
-				payload,
-			}
-		);
-	} catch (e) {
-		console.log(`Error occured on publishing customer event ${e}`);
-	}
-};
-
 const CreateChannel = async () => {
 	try {
 		const connection = await amqplib.connect(MESSAGE_QUEUE_URL);
@@ -89,10 +75,7 @@ const CreateChannel = async () => {
 const PublishMessage = async (channel, binding_key, message) => {
 	try {
 		await channel.publish(EXCHANGE_NAME, binding_key, Buffer.from(message));
-		console.log(
-			"Message has been published from shopping service",
-			message
-		);
+		console.log("Message has been published from payment service", message);
 	} catch (e) {
 		throw new AsyncAPIError(e);
 	}
@@ -100,27 +83,24 @@ const PublishMessage = async (channel, binding_key, message) => {
 
 const SubscribeMessage = async (channel, service) => {
 	try {
+		// await channel.assertExchange(EXCHANGE_NAME, "direct", { durable: true });
 		const appQueue = await channel.assertQueue("", { exclusive: true });
-		channel.bindQueue(appQueue.queue, EXCHANGE_NAME, SHOPPING_BINDING_KEY);
+
+		channel.bindQueue(appQueue.queue, EXCHANGE_NAME, PAYMENT_BINDING_KEY);
 		channel.consume(
 			appQueue.queue,
 			async (data) => {
 				try {
-					console.log("Message subscribed in shopping service");
-					// console.log(JSON.parse(data.content.toString()));
+					console.log("Message subscribed in payment service");
 					await service.SubscribeEvents(data.content.toString());
 					// channel.ack(data);
 				} catch (e) {
-					console.log("Error occuring point");
-					console.log(e);
 					throw new AsyncAPIError(e);
 				}
 			},
 			{ noAck: true }
 		);
 	} catch (e) {
-		console.log("Error occurs");
-		console.log(e);
 		throw new AsyncAPIError(e);
 	}
 };
@@ -132,8 +112,7 @@ module.exports = {
 	GenerateSignature,
 	ValidateSignature,
 	FormateData,
-	PublishCustomerEvent,
 	CreateChannel,
-	PublishMessage,
 	SubscribeMessage,
+	PublishMessage,
 };

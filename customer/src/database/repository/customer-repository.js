@@ -1,9 +1,5 @@
 const { CustomerModel, AddressModel } = require("../models");
-const {
-	BadRequestError,
-	APIError,
-	STATUS_CODES,
-} = require("../../utils/error/app-errors");
+const { APIError, STATUS_CODES } = require("../../utils/error/app-errors");
 
 class CustomerRepository {
 	async CreateCustomer({ email, password, phone, salt, name }) {

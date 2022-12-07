@@ -1,11 +1,11 @@
 const dotEnv = require("dotenv").config({ path: "./.env" });
 
-if (process.env.NODE_ENV !== "prod") {
-	const configFile = `./.env.${process.env.NODE_ENV}`;
-	// dotEnv.config({ path: configFile });
-} else {
-	dotEnv.config();
-}
+// if (process.env.NODE_ENV !== "prod") {
+//   const configFile = `./.env.${process.env.NODE_ENV}`;
+//   // dotEnv.config({ path: configFile });
+// } else {
+//   dotEnv.config();
+// }
 
 module.exports = {
 	PORT: process.env.PORT,
@@ -18,4 +18,6 @@ module.exports = {
 	PAYMENT_BINDING_KEY: "PAYMENT_SERVICE",
 	PRODUCT_BINDING_KEY: "PRODUCT_SERVICE",
 	QUEUE_NAME: "ECOMMERCE_QUEUE",
+	RAZORPAY_API_KEY: process.env.RAZORPAY_API_KEY,
+	RAZORPAY_API_SECRET: process.env.RAZORPAY_API_SECRET,
 };

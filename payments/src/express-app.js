@@ -1,8 +1,8 @@
 const express = require("express");
 const cors = require("cors");
-const { customer, appEvents } = require("./api");
 const ErrorHandler = require("./utils/error/error-handler");
 const morganMiddleware = require("./middlewares/morgan");
+const { payment } = require("./api");
 
 module.exports = async (app, channel) => {
 	app.use(morganMiddleware);
@@ -11,12 +11,11 @@ module.exports = async (app, channel) => {
 	app.use(cors());
 	app.use(express.static(__dirname + "/public"));
 
-	// appEvents(app)
-	customer(app, channel);
-
 	app.use("/status", (req, res, next) => {
-		res.send("Customer service running properly");
+		res.send("Payments service running properly");
 	});
+
+	payment(app, channel);
 
 	app.use(ErrorHandler);
 };
