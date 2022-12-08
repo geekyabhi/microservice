@@ -1,6 +1,6 @@
 const express = require("express");
 const { PORT } = require("./config");
-const ConnectDB = require("./database/connection");
+const { ConnectDB } = require("./database");
 const expressApp = require("./express-app");
 const { CreateChannel } = require("./utils");
 

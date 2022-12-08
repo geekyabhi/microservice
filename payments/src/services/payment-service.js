@@ -1,5 +1,5 @@
 const { FormateData } = require("../utils/index");
-const PaymentRepository = require("../database/repository/payment-repository");
+const { PaymentRepository } = require("../database");
 const { APIError } = require("../utils/error/app-errors");
 
 const { CreateOrder } = require("../utils/razorpay/index");
