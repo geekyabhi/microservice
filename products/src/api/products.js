@@ -69,9 +69,10 @@ module.exports = (app, channel) => {
 		try {
 			const { data: payload } = await service.GetProductPayload(
 				_id,
-				{ productId: req.params._id },
+				{ productId: req.params.id },
 				"ADD_TO_WISHLIST"
 			);
+
 			PublishMessage(
 				channel,
 				CUSTOMER_BINDING_KEY,
@@ -96,6 +97,9 @@ module.exports = (app, channel) => {
 				{ productId },
 				"REMOVE_FROM_WISHLIST"
 			);
+
+			console.log(payload);
+
 			PublishMessage(
 				channel,
 				CUSTOMER_BINDING_KEY,

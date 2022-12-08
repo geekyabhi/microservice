@@ -10,6 +10,34 @@ const { PublishMessage } = require("../utils");
 module.exports = (app, channel) => {
 	const paymentService = new PaymentService();
 
+	app.get("/", Auth, async (req, res, next) => {
+		try {
+			const query = req.query;
+			const customerId = req.user._id;
+			query.customerId = customerId;
+
+			const data = await paymentService.GetAllPayment(query);
+
+			return res.json({ success: true, data });
+		} catch (e) {
+			next(e);
+		}
+	});
+
+	app.get("/one", Auth, async (req, res, next) => {
+		try {
+			const query = req.query;
+			const customerId = req.user._id;
+			query.customerId = customerId;
+
+			const data = await paymentService.GetOnePayment(query);
+
+			return res.json({ success: true, data });
+		} catch (e) {
+			next(e);
+		}
+	});
+
 	app.post("/start", Auth, async (req, res, next) => {
 		try {
 			const customerId = req.user._id;

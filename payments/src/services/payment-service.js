@@ -9,6 +9,24 @@ class PaymentService {
 		this.repository = new PaymentRepository();
 	}
 
+	async GetAllPayment(query) {
+		try {
+			const data = await this.repository.FindPayment(query);
+			return FormateData(data);
+		} catch (e) {
+			throw new APIError(e);
+		}
+	}
+
+	async GetOnePayment(query) {
+		try {
+			const data = await this.repository.FindPayment(query);
+			return FormateData(data);
+		} catch (e) {
+			throw new APIError(e);
+		}
+	}
+
 	async PurchaseStart({ customerId, items }) {
 		try {
 			let amount = 0;
@@ -37,6 +55,7 @@ class PaymentService {
 				razorpay_order_id: order.id,
 				items: items,
 				customerId,
+				amount,
 			});
 
 			return FormateData(purchase);
