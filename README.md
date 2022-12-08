@@ -13,6 +13,8 @@
 
 -   **Postman Collections:** [https://elements.getpostman.com/redirect?entityId=15798447-f3bb0199-1fa0-4a6f-bd9e-53b9150aa852&entityType=collection](https://elements.getpostman.com/redirect?entityId=15798447-f3bb0199-1fa0-4a6f-bd9e-53b9150aa852&entityType=collection)
 
+    **ENV files:** [https://drive.google.com/drive/folders/1DfITAPQVsh9Ty2ZlyioX3NVpkDoZTpgX?usp=sharing](https://drive.google.com/drive/folders/1DfITAPQVsh9Ty2ZlyioX3NVpkDoZTpgX?usp=sharing)
+
 ## Setup Instructions
 
 -   S1 Clone the project.
