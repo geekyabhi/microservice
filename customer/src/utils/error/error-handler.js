@@ -23,18 +23,6 @@ class ErrorLogger {
 
 const ErrorHandler = async (err, req, res, next) => {
 	const errorLogger = new ErrorLogger();
-	// process.on("uncaughtException", (reason, promise) => {
-	// 	console.log(reason, "UNHANDLED");
-	// 	throw reason;
-	// });
-
-	// process.on("uncaughtException", (error) => {
-	// 	errorLogger.logError(error);
-	// 	if (errorLogger.isTrustError(err)) {
-	// 		process.exit(1);
-	// 	}
-	// });
-
 	if (err) {
 		console.log(err);
 

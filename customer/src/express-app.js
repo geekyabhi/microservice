@@ -11,7 +11,6 @@ module.exports = async (app, channel) => {
 	app.use(cors());
 	app.use(express.static(__dirname + "/public"));
 
-	// appEvents(app)
 	customer(app, channel);
 
 	app.use("/status", (req, res, next) => {

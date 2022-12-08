@@ -7,11 +7,7 @@ const {
 	GenerateSignature,
 	ValidatePassword,
 } = require("../utils");
-const {
-	APIError,
-	BadRequestError,
-	AppError,
-} = require("../utils/error/app-errors");
+const { APIError, BadRequestError } = require("../utils/error/app-errors");
 
 class CustomerService {
 	constructor() {
