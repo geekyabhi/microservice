@@ -50,7 +50,7 @@ func Subscribe(channel *amqp.Channel){
 			var data user
 			err:=json.Unmarshal([]byte(string(d.Body)),&data)
 			HandleError(err,"unmarshling data",false)
-			SendMail(data.Name,data.Email,data.Phone,data.Id,data.Event)
+			SendNotification(data.Name,data.Email,data.Phone,data.Id,data.Event)
 		}
 	}()
 
