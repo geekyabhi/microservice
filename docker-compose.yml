@@ -53,3 +53,10 @@ services:
             - "8004:8004"
         container_name: payments
         restart: always
+
+    mail:
+        build:
+            context: ./mail
+            dockerfile: Dockerfile
+        container_name: mail
+        restart: always

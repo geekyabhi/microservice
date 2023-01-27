@@ -1,101 +1,108 @@
+const { MAIL_BINDING_KEY } = require("../config");
 const Auth = require("../middlewares/auth");
 const CustomerService = require("../services/customer-service");
-const { SubscribeMessage } = require("../utils");
+const { SubscribeMessage, PublishMessage } = require("../utils");
 
 module.exports = (app, channel) => {
-  const service = new CustomerService();
-  SubscribeMessage(channel, service);
+	const service = new CustomerService();
+	SubscribeMessage(channel, service);
 
-  app.post("/signup", async (req, res, next) => {
-    try {
-      const { email, password, phone, name } = req.body;
-      const { data } = await service.SignUp({
-        email,
-        password,
-        phone,
-        name,
-      });
-      return res.json({ success: true, data });
-    } catch (e) {
-      next(e);
-    }
-  });
+	app.post("/signup", async (req, res, next) => {
+		try {
+			const { email, password, phone, name } = req.body;
+			const { data } = await service.SignUp({
+				email,
+				password,
+				phone,
+				name,
+			});
+			PublishMessage(
+				channel,
+				MAIL_BINDING_KEY,
+				JSON.stringify({ ...data, event: "register" })
+			);
 
-  app.post("/login", async (req, res, next) => {
-    try {
-      const { phone, password } = req.body;
+			return res.json({ success: true, data });
+		} catch (e) {
+			next(e);
+		}
+	});
 
-      const { data } = await service.SignIn({ phone, password });
+	app.post("/login", async (req, res, next) => {
+		try {
+			const { phone, password } = req.body;
 
-      return res.json({ success: true, data });
-    } catch (e) {
-      next(e);
-    }
-  });
+			const { data } = await service.SignIn({ phone, password });
 
-  app.post("/address", Auth, async (req, res, next) => {
-    try {
-      const { _id } = req.user;
+			return res.json({ success: true, data });
+		} catch (e) {
+			next(e);
+		}
+	});
 
-      const { street, postalCode, city, country } = req.body;
+	app.post("/address", Auth, async (req, res, next) => {
+		try {
+			const { _id } = req.user;
 
-      const { data } = await service.AddNewAddress(_id, {
-        street,
-        postalCode,
-        city,
-        country,
-      });
-      return res.json({ success: true, data });
-    } catch (e) {
-      next(e);
-    }
-  });
+			const { street, postalCode, city, country } = req.body;
 
-  app.get("/profile", Auth, async (req, res, next) => {
-    try {
-      const { _id } = req.user;
-      const { data } = await service.GetProfile({ _id });
-      return res.json({ success: true, data });
-    } catch (e) {
-      next(e);
-    }
-  });
+			const { data } = await service.AddNewAddress(_id, {
+				street,
+				postalCode,
+				city,
+				country,
+			});
+			return res.json({ success: true, data });
+		} catch (e) {
+			next(e);
+		}
+	});
 
-  app.put("/profile", Auth, async (req, res, next) => {
-    try {
-      const { _id } = req.user;
-      const { email, password, phone, name } = req.body;
+	app.get("/profile", Auth, async (req, res, next) => {
+		try {
+			const { _id } = req.user;
+			const { data } = await service.GetProfile({ _id });
+			return res.json({ success: true, data });
+		} catch (e) {
+			next(e);
+		}
+	});
 
-      const { data } = await service.UpdateProfile({
-        _id,
-        email,
-        password,
-        phone,
-        name,
-      });
-      return res.json({ success: true, data });
-    } catch (e) {
-      next(e);
-    }
-  });
+	app.put("/profile", Auth, async (req, res, next) => {
+		try {
+			const { _id } = req.user;
+			const { email, password, phone, name } = req.body;
 
-  app.get("/shoping-details", Auth, async (req, res, next) => {
-    try {
-      const { _id } = req.user;
-      const { data } = await service.GetShopingDetails(_id);
-      return res.json({ success: true, data });
-    } catch (e) {
-      next(e);
-    }
-  });
+			const { data } = await service.UpdateProfile({
+				_id,
+				email,
+				password,
+				phone,
+				name,
+			});
+			return res.json({ success: true, data });
+		} catch (e) {
+			next(e);
+		}
+	});
 
-  app.get("/wishlist", Auth, async (req, res, next) => {
-    try {
-      const { _id } = req.user;
-      const { data } = await service.GetWishList(_id);
-      return res.json({ success: true, data });
-    } catch (e) {
-      next(e);
-    }
-  });
+	app.get("/shoping-details", Auth, async (req, res, next) => {
+		try {
+			const { _id } = req.user;
+			const { data } = await service.GetShopingDetails(_id);
+			return res.json({ success: true, data });
+		} catch (e) {
+			next(e);
+		}
+	});
+
+	app.get("/wishlist", Auth, async (req, res, next) => {
+		try {
+			const { _id } = req.user;
+			const { data } = await service.GetWishList(_id);
+			return res.json({ success: true, data });
+		} catch (e) {
+			next(e);
+		}
+	});
 };
