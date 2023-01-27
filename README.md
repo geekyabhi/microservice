@@ -2,7 +2,7 @@
 
 -   A backend server api for a Ecommerce website .
 -   Distributed microservice architecture for high scalability.
--   Build on four services - _Products_ , _Customer_ , _Shopping_ , _Payments_.
+-   Build on five services - _Products_ , _Customer_ , _Shopping_ , _Payments_ , _Notification_.
 -   All microserives are highly decoupled.
 -   This app follows the Event driven architecture.
 -   An event-driven architecture uses events to trigger and communicate between decoupled services
@@ -45,4 +45,4 @@ Each of them would give a message like : Customer service running properly , Pro
 docker compose up
 ```
 ## Architechture of Microservice
-![Untitled Diagram drawio (2)](https://user-images.githubusercontent.com/55759980/207008109-dd4c8ea9-af25-440a-a6d9-590cc5389ceb.svg)
+![Untitled Diagram drawio (2)](https://res.cloudinary.com/abhistrike/image/upload/v1674835251/Microservice_Architecture_1.25x_ggzjw4.png)
