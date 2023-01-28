@@ -45,4 +45,4 @@ Each of them would give a message like : Customer service running properly , Pro
 docker compose up
 ```
 ## Architechture of Microservice
-![Untitled Diagram drawio (2)](https://res.cloudinary.com/abhistrike/image/upload/v1674835251/Microservice_Architecture_1.25x_ggzjw4.png)
+![Untitled Diagram drawio (2)](https://res.cloudinary.com/abhistrike/image/upload/v1674888550/Microservice_Architecture_1.25x_1_an6pdu.png)
