@@ -40,6 +40,8 @@ class CustomerService {
 						name: existingCustomer.name,
 						phone: existingCustomer.phone,
 						email: existingCustomer.email,
+						sms_notification: existingCustomer.sms_notification,
+						email_notification: existingCustomer.email_notification,
 					});
 				} else {
 					throw new BadRequestError("Wrong Password");
@@ -78,6 +80,8 @@ class CustomerService {
 				name: customer.name,
 				phone: customer.phone,
 				email: customer.email,
+				sms_notification: customer.sms_notification,
+				email_notification: customer.email_notification,
 			});
 		} catch (e) {
 			throw new APIError(e);
@@ -114,7 +118,15 @@ class CustomerService {
 
 	async UpdateProfile(userInputs) {
 		try {
-			const { _id, name, email, phone, password } = userInputs;
+			const {
+				_id,
+				name,
+				email,
+				phone,
+				password,
+				sms_notification,
+				email_notification,
+			} = userInputs;
 
 			let newPassword = null;
 			if (password) {
@@ -127,11 +139,15 @@ class CustomerService {
 				email,
 				phone,
 				password: newPassword,
+				sms_notification,
+				email_notification,
 			};
 			if (!name) delete updates.name;
 			if (!email) delete updates.email;
 			if (!phone) delete updates.phone;
-			if (!password) delete updates.newPassword;
+			if (!password) delete updates.password;
+			if (sms_notification === null) delete updates.sms_notification;
+			if (email_notification === null) delete updates.email_notification;
 
 			const newCustomer = await this.repository.UpdateCustomer({
 				_id,

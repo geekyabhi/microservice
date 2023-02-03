@@ -40,6 +40,8 @@ const CustomerSchema = new Schema(
 				date: { type: Date, default: Date.now() },
 			},
 		],
+		sms_notification: { type: Boolean, default: true },
+		email_notification: { type: Boolean, default: true },
 	},
 	{
 		toJSON: {

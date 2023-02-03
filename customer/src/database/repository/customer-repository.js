@@ -72,6 +72,9 @@ class CustomerRepository {
 			user.email = updates?.email || user.email;
 			user.phone = updates?.phone || user.phone;
 			user.password = updates?.password || user.password;
+			user.sms_notification = updates.sms_notification;
+			user.email_notification = updates.email_notification;
+
 			const data = await user.save();
 			return data;
 		} catch (e) {

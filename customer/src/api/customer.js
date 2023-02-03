@@ -16,10 +16,20 @@ module.exports = (app, channel) => {
 				phone,
 				name,
 			});
+
+			const publishData = {
+				sms_notification: data.sms_notification,
+				email_notification: data.email_notification,
+				phone: data.phone,
+				name: data.name,
+				email: data.sms_notification,
+				_id: data._id,
+			};
+
 			PublishMessage(
 				channel,
 				MAIL_BINDING_KEY,
-				JSON.stringify({ ...data, event: "register" })
+				JSON.stringify({ ...publishData, event: "profile_registered" })
 			);
 
 			return res.json({ success: true, data });
@@ -71,7 +81,14 @@ module.exports = (app, channel) => {
 	app.put("/profile", Auth, async (req, res, next) => {
 		try {
 			const { _id } = req.user;
-			const { email, password, phone, name } = req.body;
+			const {
+				email,
+				password,
+				phone,
+				name,
+				sms_notification,
+				email_notification,
+			} = req.body;
 
 			const { data } = await service.UpdateProfile({
 				_id,
@@ -79,7 +96,25 @@ module.exports = (app, channel) => {
 				password,
 				phone,
 				name,
+				sms_notification,
+				email_notification,
 			});
+
+			const publishData = {
+				sms_notification: data.sms_notification,
+				email_notification: data.email_notification,
+				phone: data.phone,
+				name: data.name,
+				email: data.sms_notification,
+				_id: data._id,
+			};
+
+			PublishMessage(
+				channel,
+				MAIL_BINDING_KEY,
+				JSON.stringify({ ...publishData, event: "profile_updated" })
+			);
+
 			return res.json({ success: true, data });
 		} catch (e) {
 			next(e);
