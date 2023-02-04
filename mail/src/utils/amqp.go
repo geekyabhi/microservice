@@ -4,15 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/geekyabhi/sendmailmicro/config"
+	"github.com/geekyabhi/sendmailmicro/src/config"
 	"github.com/streadway/amqp"
 )
 
-type user struct{
+type messageType struct{
 	Name string
 	Email string
 	Phone string
 	Id string
+	SMS_Notification bool
+	EMAIL_Notification bool
 	Event string
 }
 
@@ -47,10 +49,10 @@ func Subscribe(channel *amqp.Channel){
 
 	go func(){
 		for d:= range message{
-			var data user
+			var data messageType
 			err:=json.Unmarshal([]byte(string(d.Body)),&data)
 			HandleError(err,"unmarshling data",false)
-			SendNotification(data.Name,data.Email,data.Phone,data.Id,data.Event)
+			SendNotification(data.Name,data.Email,data.Phone,data.Id,data.Event,data.SMS_Notification,data.EMAIL_Notification)
 		}
 	}()
 

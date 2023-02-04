@@ -22,8 +22,8 @@ module.exports = (app, channel) => {
 				email_notification: data.email_notification,
 				phone: data.phone,
 				name: data.name,
-				email: data.sms_notification,
-				_id: data._id,
+				email: data.email,
+				id: data.id,
 			};
 
 			PublishMessage(
@@ -43,6 +43,21 @@ module.exports = (app, channel) => {
 			const { phone, password } = req.body;
 
 			const { data } = await service.SignIn({ phone, password });
+
+			const publishData = {
+				sms_notification: data.sms_notification,
+				email_notification: data.email_notification,
+				phone: data.phone,
+				name: data.name,
+				email: data.email,
+				id: data._id,
+			};
+
+			PublishMessage(
+				channel,
+				MAIL_BINDING_KEY,
+				JSON.stringify({ ...publishData, event: "profile_loggedin" })
+			);
 
 			return res.json({ success: true, data });
 		} catch (e) {
@@ -105,8 +120,8 @@ module.exports = (app, channel) => {
 				email_notification: data.email_notification,
 				phone: data.phone,
 				name: data.name,
-				email: data.sms_notification,
-				_id: data._id,
+				email: data.email,
+				id: data._id,
 			};
 
 			PublishMessage(

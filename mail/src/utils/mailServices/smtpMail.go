@@ -11,10 +11,6 @@ func SendMail(toEmail string,message string){
 	email := os.Getenv("BASE_EMAIL")
 	password := os.Getenv("BASE_PASSWORD")
 
-	print(email)
-
-	println(password)
-
 	auth := smtp.PlainAuth("",email,password,"smtp.gmail.com")
 	err:=smtp.SendMail("smtp.gmail.com:587",auth,"thakurabhinav17122001@gmail.com",[]string{toEmail},[]byte(message))
 

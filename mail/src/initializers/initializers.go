@@ -1,7 +1,7 @@
 package initializers
 
 import (
-	"github.com/geekyabhi/sendmailmicro/config"
+	"github.com/geekyabhi/sendmailmicro/src/config"
 )
 
 func Initialize(){

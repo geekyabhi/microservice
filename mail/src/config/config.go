@@ -12,6 +12,7 @@ type Config struct{
 	QUEUE_NAME string
 	EXCHANGE_NAME string
 	MAIL_BINDING_KEY string
+	DB_URL string
 }
 
 var ConfigVar Config
@@ -25,4 +26,5 @@ func LoadConfig(){
 	ConfigVar.EXCHANGE_NAME="ECOMMERCE"
 	ConfigVar.MAIL_BINDING_KEY="MAIL_SERVICE"
 	ConfigVar.RABBIT_MQ_URL=string(os.Getenv("RABBIT_MQ_URL"))
+	ConfigVar.DB_URL=string(os.Getenv("DB_URL"))
 }
