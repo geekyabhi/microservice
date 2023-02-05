@@ -50,7 +50,7 @@ module.exports = (app, channel) => {
 				phone: data.phone,
 				name: data.name,
 				email: data.email,
-				id: data._id,
+				id: data.id,
 			};
 
 			PublishMessage(

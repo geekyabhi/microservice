@@ -19,6 +19,7 @@ func main(){
 	_,err:=connection.ConnectDB()
 	err=migrate.Migrate()
 	channel,err:=utils.Connect()
+	// fmt.Print(err)
 	if err!=nil{
 		log.Fatal(err)
 		os.Exit(1)
