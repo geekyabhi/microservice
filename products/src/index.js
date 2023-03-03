@@ -3,14 +3,16 @@ const { PORT } = require("./config");
 const ConnectDB = require("./database/connection");
 const expressApp = require("./express-app");
 const { CreateChannel } = require("./utils");
+const { ConnectRedis } = require("./utils/cache");
 
 const StartServer = async () => {
 	try {
 		const app = express();
 		await ConnectDB();
-
 		const channel = await CreateChannel();
-		await expressApp(app, channel);
+		const redisClient = await ConnectRedis();
+
+		await expressApp(app, channel, redisClient);
 
 		app.listen(PORT, () => {
 			console.log(`Products server running to port ${PORT}`.yellow);

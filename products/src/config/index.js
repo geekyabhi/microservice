@@ -18,4 +18,5 @@ module.exports = {
 	PAYMENT_BINDING_KEY: "PAYMENT_SERVICE",
 	PRODUCT_BINDING_KEY: "PRODUCT_SERVICE",
 	QUEUE_NAME: "ECOMMERCE_QUEUE",
+	REDIS_URL: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
 };

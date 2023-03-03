@@ -17,6 +17,15 @@ services:
         container_name: nosql-db
         volumes:
             - ./db/:/data/db
+    redis:
+        image: redis
+        ports:
+            - "6379:6379"
+        restart: always
+        container_name: redis
+        volumes:
+            - ./redis/:/redis/db
+
     postgres-db:
         image: postgres:14.1-alpine
         restart: always

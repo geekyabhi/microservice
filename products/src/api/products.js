@@ -2,8 +2,9 @@ const ProductService = require("../services/product-service");
 const Auth = require("../middlewares/auth");
 const { PublishMessage } = require("../utils");
 const { CUSTOMER_BINDING_KEY, SHOPPING_BINDING_KEY } = require("../config");
+const { RedisGET, RedisSET } = require("../utils/cache");
 
-module.exports = (app, channel) => {
+module.exports = (app, channel, redisClient) => {
 	const service = new ProductService();
 
 	app.post("/", async (req, res, next) => {
@@ -36,9 +37,24 @@ module.exports = (app, channel) => {
 
 	app.get("/ids", async (req, res, next) => {
 		try {
-			const { ids } = req.body || [];
-			const products = await service.GetSelectedProducts(ids);
-			return res.status(200).json({ success: true, data: products });
+			const { ids } = req.body;
+			var products = await RedisGET(redisClient, "/products/selected");
+			var from_cache = true;
+			if (!products) {
+				products = await service.GetSelectedProducts(ids);
+				from_cache = false;
+				const status = await RedisSET(
+					redisClient,
+					"/products/selected",
+					JSON.stringify(products),
+					30
+				);
+			} else {
+				products = JSON.parse(products);
+			}
+			return res
+				.status(200)
+				.json({ success: true, data: products, from_cache });
 		} catch (err) {
 			next(err);
 		}
@@ -47,8 +63,29 @@ module.exports = (app, channel) => {
 	app.get("/:id", async (req, res, next) => {
 		const productId = req.params.id;
 		try {
-			const { data } = await service.GetProductDescription(productId);
-			return res.status(200).json({ success: true, data });
+			var products = await RedisGET(
+				redisClient,
+				`/products/${productId}`
+			);
+			var from_cache = true;
+
+			if (!products) {
+				const { data } = await service.GetProductDescription(productId);
+				products = data;
+				from_cache = false;
+				const status = await RedisSET(
+					redisClient,
+					`/products/${productId}`,
+					JSON.stringify(products),
+					30
+				);
+			} else {
+				products = JSON.parse(products);
+			}
+
+			return res
+				.status(200)
+				.json({ success: true, data: products, from_cache });
 		} catch (err) {
 			next(err);
 		}
@@ -57,10 +94,29 @@ module.exports = (app, channel) => {
 	app.get("/", async (req, res, next) => {
 		const query = req.query;
 		try {
-			const { data } = await service.GetProducts(query);
-			return res.status(200).json({ success: true, data });
+			var products = await RedisGET(
+				redisClient,
+				`/products/all/` + JSON.stringify(query)
+			);
+			var from_cache = true;
+			if (!products) {
+				const { data } = await service.GetProducts(query);
+				products = data;
+				from_cache = false;
+				const status = await RedisSET(
+					redisClient,
+					`/products/all/` + JSON.stringify(query),
+					JSON.stringify(products),
+					30
+				);
+			} else {
+				products = JSON.parse(products);
+			}
+			return res
+				.status(200)
+				.json({ success: true, data: products, from_cache });
 		} catch (error) {
-			next(err);
+			next(error);
 		}
 	});
 

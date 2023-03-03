@@ -64,6 +64,7 @@ const CreateChannel = async () => {
 		const connection = await amqplib.connect(MESSAGE_QUEUE_URL);
 		const channel = await connection.createChannel();
 		await channel.assertExchange(EXCHANGE_NAME, "direct", false);
+		console.log(`Broker connected on ${MESSAGE_QUEUE_URL}`.green);
 		return channel;
 	} catch (e) {
 		throw new Error(e);
