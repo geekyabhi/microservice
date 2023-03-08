@@ -10,22 +10,6 @@ services:
         ports:
             - "8000:80"
 
-    nosql-db:
-        image: mongo
-        ports:
-            - "27017:27017"
-        container_name: nosql-db
-        volumes:
-            - ./db/:/data/db
-    redis:
-        image: redis
-        ports:
-            - "6379:6379"
-        restart: always
-        container_name: redis
-        volumes:
-            - ./redis/:/redis/db
-
     postgres-db:
         image: postgres:14.1-alpine
         restart: always
@@ -37,7 +21,24 @@ services:
         ports:
             - "5432:5432"
         volumes:
-            - /db:/var/lib/postgresql/data
+            - ./psql-db:/var/lib/postgresql/data
+
+    nosql-db:
+        image: mongo
+        ports:
+            - "27017:27017"
+        container_name: nosql-db
+        volumes:
+            - ./mongo-db/:/data/db
+
+    redis:
+        image: redis
+        ports:
+            - "6379:6379"
+        restart: always
+        container_name: redis
+        volumes:
+            - ./redis-db/:/redis/db
 
     customer:
         build:
