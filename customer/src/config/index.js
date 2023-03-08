@@ -19,4 +19,5 @@ module.exports = {
 	PRODUCT_BINDING_KEY: "PRODUCT_SERVICE",
 	MAIL_BINDING_KEY: "MAIL_SERVICE",
 	QUEUE_NAME: "ECOMMERCE_QUEUE",
+	REDIS_URL: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
 };

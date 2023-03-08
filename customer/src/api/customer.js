@@ -2,8 +2,9 @@ const { MAIL_BINDING_KEY } = require("../config");
 const Auth = require("../middlewares/auth");
 const CustomerService = require("../services/customer-service");
 const { SubscribeMessage, PublishMessage } = require("../utils");
+const { RedisGET, RedisSET, RedisDEL } = require("../utils/cache");
 
-module.exports = (app, channel) => {
+module.exports = (app, channel, redisClient) => {
 	const service = new CustomerService();
 	SubscribeMessage(channel, service);
 
@@ -86,8 +87,23 @@ module.exports = (app, channel) => {
 	app.get("/profile", Auth, async (req, res, next) => {
 		try {
 			const { _id } = req.user;
-			const { data } = await service.GetProfile({ _id });
-			return res.json({ success: true, data });
+			var profile = await RedisGET(redisClient, `${_id}#profile`);
+			var from_cache = true;
+
+			if (!profile) {
+				const { data } = await service.GetProfile({ _id });
+				profile = data;
+				from_cache = false;
+				const status = await RedisSET(
+					redisClient,
+					`${_id}#profile`,
+					JSON.stringify(profile),
+					30
+				);
+			} else {
+				profile = JSON.parse(profile);
+			}
+			return res.json({ success: true, data: profile, from_cache });
 		} catch (e) {
 			next(e);
 		}
@@ -123,6 +139,7 @@ module.exports = (app, channel) => {
 				email: data.email,
 				id: data._id,
 			};
+			await RedisDEL(redisClient, `${_id}#profile`);
 
 			PublishMessage(
 				channel,
