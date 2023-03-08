@@ -24,8 +24,8 @@
 
 ```bash
 
-# make sure that port 8080 is free for this application.
-
+# make sure that port 8080 is free for this application and ports are free as per the docker-compose.yml.
+docker compose build --no-cache
 docker compose up
 ```
 
@@ -42,7 +42,7 @@ Each of them would give a message like : Customer service running properly , Pro
 
 # To close application
 
-docker compose up
+docker compose down
 ```
 ## Architechture of Microservice
-![Untitled Diagram drawio (2)](https://res.cloudinary.com/abhistrike/image/upload/v1674888550/Microservice_Architecture_1.25x_1_an6pdu.png)
+![Untitled Diagram drawio (2)](https://res.cloudinary.com/abhistrike/image/upload/v1678277975/Microservice_Architecture_1.25x_zb0hhg.png)
