@@ -1,5 +1,4 @@
 const { OrderModel, CartModel } = require("../models");
-const { v4: uuidv4 } = require("uuid");
 const {
 	BadRequestError,
 	APIError,
@@ -22,7 +21,7 @@ class ShoppingRepository {
 			const orderResult = await order.save();
 			return orderResult;
 		} catch (e) {
-			throw APIError(
+			throw new APIError(
 				"API Error",
 				STATUS_CODES.INTERNAL_ERROR,
 				`Unable to Create Order ${e}`
@@ -40,14 +39,16 @@ class ShoppingRepository {
 	}) {
 		try {
 			const order = await OrderModel.findOne({ orderId });
-			if (!order) throw new Error("No such error exist");
+			if (!order) throw new Error("No such order exists");
 			order.customerId = customerId || order.customerId;
 			order.amount = amount || order.amount;
 			order.status = status || order.status;
 			order.txnId = txnId || order.txnId;
 			order.items = items || order.items;
+			await order.save();
+			return order;
 		} catch (e) {
-			throw APIError(
+			throw new APIError(
 				"API Error",
 				STATUS_CODES.INTERNAL_ERROR,
 				`Unable to Update Order ${e}`
@@ -67,7 +68,7 @@ class ShoppingRepository {
 					desc: item.desc,
 					type: item.type,
 					unit: unit,
-					suplier: item.suplier,
+					supplier: item.supplier || item.suplier,
 					price: item.price,
 				});
 				const cartData = new CartModel({
@@ -78,25 +79,50 @@ class ShoppingRepository {
 				return cartDataResult;
 			} else {
 				const items = cart.items || [];
-				items.push({
-					_id: item._id,
-					name: item.name,
-					banner: item.banner,
-					desc: item.desc,
-					type: item.type,
-					unit: unit,
-					suplier: item.suplier,
-					price: item.price,
-				});
+				const existingIndex = items.findIndex(
+					(i) => i._id.toString() === item._id.toString()
+				);
+				if (existingIndex >= 0) {
+					items[existingIndex].unit = unit;
+				} else {
+					items.push({
+						_id: item._id,
+						name: item.name,
+						banner: item.banner,
+						desc: item.desc,
+						type: item.type,
+						unit: unit,
+						supplier: item.supplier || item.suplier,
+						price: item.price,
+					});
+				}
 				cart.items = items;
 				const cartData = await cart.save();
 				return cartData;
 			}
 		} catch (e) {
-			throw APIError(
+			throw new APIError(
 				"API Error",
 				STATUS_CODES.INTERNAL_ERROR,
 				`Unable to Add to Cart ${e}`
+			);
+		}
+	}
+
+	async RemoveFromCart({ customerId, itemId }) {
+		try {
+			const cart = await CartModel.findOne({ customerId });
+			if (!cart) return {};
+			cart.items = cart.items.filter(
+				(i) => i._id.toString() !== itemId.toString()
+			);
+			const cartData = await cart.save();
+			return cartData;
+		} catch (e) {
+			throw new APIError(
+				"API Error",
+				STATUS_CODES.INTERNAL_ERROR,
+				`Unable to Remove from Cart ${e}`
 			);
 		}
 	}
@@ -106,7 +132,7 @@ class ShoppingRepository {
 			const orders = await OrderModel.find({ customerId });
 			return orders;
 		} catch (e) {
-			throw APIError(
+			throw new APIError(
 				"API Error",
 				STATUS_CODES.INTERNAL_ERROR,
 				`Unable to Get Orders ${e}`
@@ -120,10 +146,10 @@ class ShoppingRepository {
 			if (!cart) return {};
 			return cart;
 		} catch (e) {
-			throw APIError(
+			throw new APIError(
 				"API Error",
 				STATUS_CODES.INTERNAL_ERROR,
-				`Unable to Get Orders ${e}`
+				`Unable to Get Cart ${e}`
 			);
 		}
 	}
@@ -131,10 +157,10 @@ class ShoppingRepository {
 	async EmptyCart({ customerId }) {
 		try {
 			const cart = await CartModel.findOne({ customerId });
-			if (cart) await cart.remove();
+			if (cart) await CartModel.deleteOne({ customerId });
 			return cart;
 		} catch (e) {
-			throw APIError(
+			throw new APIError(
 				"API Error",
 				STATUS_CODES.INTERNAL_ERROR,
 				`Unable to Clear Cart ${e}`

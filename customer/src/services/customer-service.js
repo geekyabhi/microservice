@@ -1,4 +1,4 @@
-const { AsyncAPIError } = require("../../src/utils/error/app-errors");
+const { AsyncAPIError } = require("../utils/error/app-errors");
 const { CustomerRepository } = require("../database");
 const {
 	FormateData,
@@ -22,32 +22,33 @@ class CustomerService {
 				phone,
 			});
 
-			if (existingCustomer) {
-				const validPassword = await ValidatePassword(
-					password,
-					existingCustomer.password,
-					existingCustomer.salt
-				);
-
-				if (validPassword) {
-					const token = await GenerateSignature({
-						email: existingCustomer.email,
-						_id: existingCustomer._id,
-					});
-					return FormateData({
-						id: existingCustomer._id,
-						token,
-						name: existingCustomer.name,
-						phone: existingCustomer.phone,
-						email: existingCustomer.email,
-						sms_notification: existingCustomer.sms_notification,
-						email_notification: existingCustomer.email_notification,
-					});
-				} else {
-					throw new BadRequestError("Wrong Password");
-				}
+			if (!existingCustomer) {
+				throw new BadRequestError("User not found with that phone number");
 			}
-			return FormateData(null);
+
+			const validPassword = await ValidatePassword(
+				password,
+				existingCustomer.password,
+				existingCustomer.salt
+			);
+
+			if (!validPassword) {
+				throw new BadRequestError("Wrong Password");
+			}
+
+			const token = await GenerateSignature({
+				email: existingCustomer.email,
+				_id: existingCustomer._id,
+			});
+			return FormateData({
+				id: existingCustomer._id,
+				token,
+				name: existingCustomer.name,
+				phone: existingCustomer.phone,
+				email: existingCustomer.email,
+				sms_notification: existingCustomer.sms_notification,
+				email_notification: existingCustomer.email_notification,
+			});
 		} catch (e) {
 			throw new APIError(e);
 		}
@@ -129,9 +130,10 @@ class CustomerService {
 			} = userInputs;
 
 			let newPassword = null;
+			let newSalt = null;
 			if (password) {
-				let salt = await GenerateSalt();
-				newPassword = await GeneratePassword(password, salt);
+				newSalt = await GenerateSalt();
+				newPassword = await GeneratePassword(password, newSalt);
 			}
 
 			let updates = {
@@ -139,13 +141,14 @@ class CustomerService {
 				email,
 				phone,
 				password: newPassword,
+				salt: newSalt,
 				sms_notification,
 				email_notification,
 			};
 			if (!name) delete updates.name;
 			if (!email) delete updates.email;
 			if (!phone) delete updates.phone;
-			if (!password) delete updates.password;
+			if (!password) { delete updates.password; delete updates.salt; }
 			if (sms_notification === null) delete updates.sms_notification;
 			if (email_notification === null) delete updates.email_notification;
 
@@ -196,6 +199,18 @@ class CustomerService {
 		}
 	}
 
+	async RemoveFromWishlist(customerId, product) {
+		try {
+			const wishlistResult = await this.repository.RemoveWishlistItem(
+				customerId,
+				product
+			);
+			return FormateData(wishlistResult);
+		} catch (e) {
+			throw new APIError(e);
+		}
+	}
+
 	async ManageCart(customerId, product, qty, isRemove) {
 		try {
 			const cartResult = await this.repository.AddCartItem(
@@ -234,7 +249,7 @@ class CustomerService {
 					await this.AddToWishlist(userId, product);
 					break;
 				case "REMOVE_FROM_WISHLIST":
-					await this.AddToWishlist(userId, product);
+					await this.RemoveFromWishlist(userId, product);
 					break;
 				case "ADD_TO_CART":
 					await this.ManageCart(userId, product, qty, false);

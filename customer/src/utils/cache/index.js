@@ -1,55 +1,51 @@
 const redis = require("redis");
 const { REDIS_URL } = require("../../config");
 
-const ConnectRedis = async () => {
-	return new Promise(async (resolve, reject) => {
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+
+const ConnectRedis = async (retries = 8, delay = 3000) => {
+	for (let attempt = 1; attempt <= retries; attempt++) {
 		try {
-			const redisClient = redis.createClient({
-				url: REDIS_URL,
-			});
+			const redisClient = redis.createClient({ url: REDIS_URL });
 			await redisClient.connect();
 			console.log(`Redis connected on ${REDIS_URL}`.magenta);
-			resolve(redisClient);
+			return redisClient;
 		} catch (e) {
-			reject(e);
+			if (attempt < retries) {
+				console.log(`[Redis] attempt ${attempt}/${retries} failed — retrying in ${delay}ms...`);
+				await sleep(delay);
+			} else {
+				throw new Error(`Could not connect to Redis after ${retries} attempts: ${e}`);
+			}
 		}
-	});
+	}
 };
 
-const RedisGET = (redisClient, key) => {
-	return new Promise(async (resolve, reject) => {
-		try {
-			const data = await redisClient.get(key);
-			resolve(data);
-		} catch (e) {
-			reject(e);
-		}
-	});
+const RedisGET = async (redisClient, key) => {
+	try {
+		return await redisClient.get(key);
+	} catch (e) {
+		console.error(`Redis GET error for key ${key}:`, e);
+		return null;
+	}
 };
 
-const RedisSET = (redisClient, key, value, time = 30, nx = true) => {
-	return new Promise(async (resolve, reject) => {
-		try {
-			const data = await redisClient.set(key, value, {
-				EX: time,
-				NX: nx,
-			});
-			resolve(data);
-		} catch (e) {
-			reject(e);
-		}
-	});
+const RedisSET = async (redisClient, key, value, time = 30, nx = true) => {
+	try {
+		return await redisClient.set(key, value, { EX: time, NX: nx });
+	} catch (e) {
+		console.error(`Redis SET error for key ${key}:`, e);
+		return null;
+	}
 };
 
-const RedisDEL = (redisClient, key) => {
-	return new Promise(async (resolve, reject) => {
-		try {
-			const data = await redisClient.del(key);
-			resolve(data);
-		} catch (e) {
-			reject(e);
-		}
-	});
+const RedisDEL = async (redisClient, key) => {
+	try {
+		return await redisClient.del(key);
+	} catch (e) {
+		console.error(`Redis DEL error for key ${key}:`, e);
+		return null;
+	}
 };
 
 module.exports = { ConnectRedis, RedisSET, RedisGET, RedisDEL };

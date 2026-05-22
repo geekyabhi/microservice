@@ -1,12 +1,17 @@
-FROM golang:latest
+FROM golang:1.21-alpine AS build
 
-WORKDIR /project/go-docker/
+WORKDIR /app
 
 COPY go.* ./
 RUN go mod download
 
 COPY . .
-RUN go build -o /project/go-docker/build/myapp .
+RUN go build -o /app/mail .
 
-EXPOSE 8080
-ENTRYPOINT [ "/project/go-docker/build/myapp" ]
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /app
+COPY --from=build /app/mail .
+
+ENTRYPOINT ["/app/mail"]

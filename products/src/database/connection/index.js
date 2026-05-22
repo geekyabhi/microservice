@@ -2,23 +2,28 @@ const mongoose = require("mongoose");
 require("colors");
 const { DB_URL } = require("../../config");
 
-const ConnectDB = () => {
-  return new Promise(async (resolve, reject) => {
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+
+const ConnectDB = async (retries = 8, delay = 3000) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const { connection } = await mongoose.connect(DB_URL, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });
       console.log(
-        `Database connected on port ${connection.port} on host ${connection.host}`
-          .cyan
+        `Database connected on port ${connection.port} on host ${connection.host}`.cyan
       );
-      resolve("Database connected");
+      return;
     } catch (e) {
-      console.log(e);
-      reject("DB error while connecting");
+      if (attempt < retries) {
+        console.log(`[MongoDB] attempt ${attempt}/${retries} failed — retrying in ${delay}ms...`);
+        await sleep(delay);
+      } else {
+        throw new Error(`Could not connect to MongoDB after ${retries} attempts: ${e}`);
+      }
     }
-  });
+  }
 };
 
 module.exports = ConnectDB;

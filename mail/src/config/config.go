@@ -20,9 +20,9 @@ var ConfigVar Config
 func LoadConfig(){
 	err:=godotenv.Load()
 	if err!=nil{
-		log.Fatal("Error while loading variables")
+		log.Println("Warning: .env file not found, reading from environment variables")
 	}
-	ConfigVar.QUEUE_NAME="ECOMMERCE_QUEU"
+	ConfigVar.QUEUE_NAME="ECOMMERCE_QUEUE"
 	ConfigVar.EXCHANGE_NAME="ECOMMERCE"
 	ConfigVar.MAIL_BINDING_KEY="MAIL_SERVICE"
 	ConfigVar.RABBIT_MQ_URL=string(os.Getenv("RABBIT_MQ_URL"))

@@ -23,7 +23,7 @@ const StartServer = async () => {
 		});
 	} catch (e) {
 		console.log(e);
-		process.exit(0);
+		process.exit(1);
 	}
 };
 

@@ -10,6 +10,7 @@ class ShoppingService {
 	constructor() {
 		this.repository = new ShoppingRepository();
 	}
+
 	async CreateOrder({ orderId, customerId, amount, status, txnId, items }) {
 		try {
 			const order = await this.repository.CreateOrder({
@@ -32,6 +33,18 @@ class ShoppingService {
 				customerId,
 				item,
 				unit,
+			});
+			return FormateData(cart);
+		} catch (e) {
+			throw new APIError(e);
+		}
+	}
+
+	async RemoveItemFromCart({ customerId, itemId }) {
+		try {
+			const cart = await this.repository.RemoveFromCart({
+				customerId,
+				itemId,
 			});
 			return FormateData(cart);
 		} catch (e) {
@@ -77,6 +90,7 @@ class ShoppingService {
 				items,
 				item,
 				unit,
+				itemId,
 			} = data;
 
 			switch (event) {
@@ -95,6 +109,9 @@ class ShoppingService {
 					break;
 				case "ADD_TO_CART":
 					await this.AddItemToCart({ customerId, item, unit });
+					break;
+				case "REMOVE_FROM_CART":
+					await this.RemoveItemFromCart({ customerId, itemId: item?._id || itemId });
 					break;
 				default:
 					break;

@@ -10,6 +10,8 @@ const {
 	PRODUCT_BINDING_KEY,
 } = require("../config");
 
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+
 const GenerateSalt = async () => {
 	try {
 		return await bcrypt.genSalt();
@@ -44,6 +46,9 @@ const GenerateSignature = async (payload) => {
 
 const ValidateSignature = async (signature) => {
 	try {
+		if (!signature || !signature.includes(" ")) {
+			throw new Error("Invalid authorization header format");
+		}
 		const token = signature.split(" ")[1];
 		const payload = await jwt.verify(token, APP_SECRET);
 		return payload;
@@ -59,22 +64,39 @@ const FormateData = (data) => {
 		throw new Error(`Data Not found!`);
 	}
 };
-const CreateChannel = async () => {
-	try {
-		const connection = await amqplib.connect(MESSAGE_QUEUE_URL);
-		const channel = await connection.createChannel();
-		await channel.assertExchange(EXCHANGE_NAME, "direct", false);
-		console.log(`Broker connected on ${MESSAGE_QUEUE_URL}`.green);
-		return channel;
-	} catch (e) {
-		throw new Error(e);
+
+const CreateChannel = async (retries = 8, delay = 4000) => {
+	for (let attempt = 1; attempt <= retries; attempt++) {
+		try {
+			const connection = await amqplib.connect(MESSAGE_QUEUE_URL);
+			const channel = await connection.createChannel();
+			await channel.assertExchange(EXCHANGE_NAME, "direct", { durable: true });
+			console.log(`Broker connected on ${MESSAGE_QUEUE_URL}`.green);
+
+			connection.on("error", (err) => {
+				console.error("RabbitMQ connection error:", err.message);
+			});
+			connection.on("close", () => {
+				console.warn("RabbitMQ connection closed. Restarting...");
+				process.exit(1);
+			});
+
+			return channel;
+		} catch (e) {
+			if (attempt < retries) {
+				console.log(`[RabbitMQ] attempt ${attempt}/${retries} failed — retrying in ${delay}ms...`);
+				await sleep(delay);
+			} else {
+				throw new Error(`Could not connect to RabbitMQ after ${retries} attempts: ${e}`);
+			}
+		}
 	}
 };
 
 const PublishMessage = async (channel, binding_key, message) => {
 	try {
 		await channel.publish(EXCHANGE_NAME, binding_key, Buffer.from(message));
-		console.log("Message has been published from product service", message);
+		console.log("Message published from product service", message);
 	} catch (e) {
 		throw new AsyncAPIError(e);
 	}
@@ -82,18 +104,16 @@ const PublishMessage = async (channel, binding_key, message) => {
 
 const SubscribeMessage = async (channel, service) => {
 	try {
-		// await channel.assertExchange(EXCHANGE_NAME, "direct", { durable: true });
-
 		const appQueue = await channel.assertQueue("", { exclusive: true });
 		channel.bindQueue(appQueue.queue, EXCHANGE_NAME, PRODUCT_BINDING_KEY);
 		channel.consume(
 			appQueue.queue,
-			(data) => {
+			async (data) => {
 				try {
 					console.log("Message subscribed in product service");
-					// channel.ack(data);
+					await service.SubscribeEvents(data.content.toString());
 				} catch (e) {
-					throw new AsyncAPIError(e);
+					console.error("Error processing product message:", e);
 				}
 			},
 			{ noAck: true }

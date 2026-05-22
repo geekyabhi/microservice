@@ -71,7 +71,10 @@ class CustomerRepository {
 			user.name = updates?.name || user.name;
 			user.email = updates?.email || user.email;
 			user.phone = updates?.phone || user.phone;
-			user.password = updates?.password || user.password;
+			if (updates?.password) {
+				user.password = updates.password;
+				user.salt = updates.salt;
+			}
 			user.sms_notification = updates.sms_notification;
 			user.email_notification = updates.email_notification;
 
@@ -219,6 +222,30 @@ class CustomerRepository {
 				"API Error",
 				STATUS_CODES.INTERNAL_ERROR,
 				`Error on adding to cart ${e}`
+			);
+		}
+	}
+
+	async RemoveWishlistItem(customerId, { _id }) {
+		try {
+			const profile = await CustomerModel.findById(customerId).populate(
+				"wishlist"
+			);
+
+			if (profile) {
+				profile.wishlist = profile.wishlist.filter(
+					(item) => item._id.toString() !== _id.toString()
+				);
+				const profileResult = await profile.save();
+				return profileResult.wishlist;
+			} else {
+				throw new Error("No such profile found");
+			}
+		} catch (e) {
+			throw new APIError(
+				"API Error",
+				STATUS_CODES.INTERNAL_ERROR,
+				`Error removing from wishlist ${e}`
 			);
 		}
 	}

@@ -81,6 +81,21 @@ class ProductService {
 			throw new APIError(e);
 		}
 	}
+
+	async SubscribeEvents(payload) {
+		payload = JSON.parse(payload);
+		try {
+			const { event, data } = payload;
+			const { userId, product, qty } = data || {};
+
+			switch (event) {
+				default:
+					break;
+			}
+		} catch (e) {
+			console.log(`Error processing product event: ${e}`);
+		}
+	}
 }
 
 module.exports = ProductService;

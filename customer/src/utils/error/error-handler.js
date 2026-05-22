@@ -7,7 +7,7 @@ class ErrorLogger {
 		LogErrors.log({
 			private: true,
 			level: "error",
-			message: `Name : ${err.name} | Descriptiion : ${err.description} | Status Code : ${err.statusCode} | IsOperational : ${err.isOperational}`,
+			message: `Name : ${err.name} | Description : ${err.description} | Status Code : ${err.statusCode} | IsOperational : ${err.isOperational}`,
 		});
 		return false;
 	}

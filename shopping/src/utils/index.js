@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
+const axios = require("axios");
 const amqplib = require("amqplib");
 
 const {
@@ -9,8 +9,11 @@ const {
 	MESSAGE_QUEUE_URL,
 	EXCHANGE_NAME,
 	QUEUE_NAME,
+	GATEWAY_URL,
 } = require("../config");
 const { AsyncAPIError } = require("./error/app-errors");
+
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 const GenerateSalt = async () => {
 	try {
@@ -46,6 +49,9 @@ const GenerateSignature = async (payload) => {
 
 const ValidateSignature = async (signature) => {
 	try {
+		if (!signature || !signature.includes(" ")) {
+			throw new Error("Invalid authorization header format");
+		}
 		const token = signature.split(" ")[1];
 		const payload = await jwt.verify(token, APP_SECRET);
 		return payload;
@@ -64,35 +70,45 @@ const FormateData = (data) => {
 
 const PublishCustomerEvent = async (payload) => {
 	try {
-		const data = await axios.post(
-			`http://localhost:8000/customer/app-events`,
-			{
-				payload,
-			}
-		);
+		const gatewayUrl = GATEWAY_URL || "http://nginx:80";
+		await axios.post(`${gatewayUrl}/customer/app-events`, { payload });
 	} catch (e) {
-		console.log(`Error occured on publishing customer event ${e}`);
+		console.log(`Error publishing customer event: ${e}`);
 	}
 };
 
-const CreateChannel = async () => {
-	try {
-		const connection = await amqplib.connect(MESSAGE_QUEUE_URL);
-		const channel = await connection.createChannel();
-		await channel.assertExchange(EXCHANGE_NAME, "direct", false);
-		return channel;
-	} catch (e) {
-		throw new Error(e);
+const CreateChannel = async (retries = 8, delay = 4000) => {
+	for (let attempt = 1; attempt <= retries; attempt++) {
+		try {
+			const connection = await amqplib.connect(MESSAGE_QUEUE_URL);
+			const channel = await connection.createChannel();
+			await channel.assertExchange(EXCHANGE_NAME, "direct", { durable: true });
+			console.log(`Broker connected on ${MESSAGE_QUEUE_URL}`.green);
+
+			connection.on("error", (err) => {
+				console.error("RabbitMQ connection error:", err.message);
+			});
+			connection.on("close", () => {
+				console.warn("RabbitMQ connection closed. Restarting...");
+				process.exit(1);
+			});
+
+			return channel;
+		} catch (e) {
+			if (attempt < retries) {
+				console.log(`[RabbitMQ] attempt ${attempt}/${retries} failed — retrying in ${delay}ms...`);
+				await sleep(delay);
+			} else {
+				throw new Error(`Could not connect to RabbitMQ after ${retries} attempts: ${e}`);
+			}
+		}
 	}
 };
 
 const PublishMessage = async (channel, binding_key, message) => {
 	try {
 		await channel.publish(EXCHANGE_NAME, binding_key, Buffer.from(message));
-		console.log(
-			"Message has been published from shopping service",
-			message
-		);
+		console.log("Message published from shopping service", message);
 	} catch (e) {
 		throw new AsyncAPIError(e);
 	}
@@ -107,20 +123,14 @@ const SubscribeMessage = async (channel, service) => {
 			async (data) => {
 				try {
 					console.log("Message subscribed in shopping service");
-					// console.log(JSON.parse(data.content.toString()));
 					await service.SubscribeEvents(data.content.toString());
-					// channel.ack(data);
 				} catch (e) {
-					console.log("Error occuring point");
-					console.log(e);
-					throw new AsyncAPIError(e);
+					console.error("Error processing shopping message:", e);
 				}
 			},
 			{ noAck: true }
 		);
 	} catch (e) {
-		console.log("Error occurs");
-		console.log(e);
 		throw new AsyncAPIError(e);
 	}
 };
